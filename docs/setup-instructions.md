@@ -4,7 +4,7 @@ This guide covers the current Otter stack: Cloudflare Workers, Neon Postgres, Be
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 24+
 - pnpm
 - A Neon account
 - A Cloudflare account
