@@ -21,12 +21,18 @@
   },
   "compatibility_date": "2026-03-12",
   "compatibility_flags": ["nodejs_compat"],
-  "hyperdrive": [
-    {
-      "binding": "HYPERDRIVE",
-      "id": "fb72d6282a264b2e9f59a42e010bff2f"
-    }
-  ],
+  /**
+   * Hyperdrive (optional connection pooling in front of Postgres). Without it
+   * the Worker connects with the DATABASE_URL secret. To use it, create one
+   * with `wrangler hyperdrive create otter --connection-string="…"` and
+   * uncomment this block with the returned id.
+   */
+  // "hyperdrive": [
+  //   {
+  //     "binding": "HYPERDRIVE",
+  //     "id": "<your-hyperdrive-id>"
+  //   }
+  // ],
   "keep_vars": true,
   "main": "worker/index.ts",
   "name": "otter-web",
@@ -66,21 +72,26 @@
       }
     }
   ],
-  /* Custom domain */
-  "routes": [
-    {
-      "custom_domain": true,
-      "pattern": "otter.zander.wtf",
-      "zone_name": "zander.wtf"
-    }
-  ],
+  /**
+   * Custom domain. Without it the Worker is served on its workers.dev URL.
+   * To use your own domain (a zone in your Cloudflare account), uncomment and
+   * replace the values.
+   */
+  // "routes": [
+  //   {
+  //     "custom_domain": true,
+  //     "pattern": "otter.example.com",
+  //     "zone_name": "example.com"
+  //   }
+  // ],
+  "workers_dev": true,
   /**
    * Environment Variables
    * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+   * BETTER_AUTH_URL must match the app origin: set it as a secret
+   * (`wrangler secret put BETTER_AUTH_URL`) or add it here.
    */
-  "vars": {
-    "BETTER_AUTH_URL": "https://otter.zander.wtf"
-  },
+  "vars": {},
   /**
    * PR previews (.github/workflows/ci.yml). A separate `otter-web-preview`
    * Worker, so preview versions never share secrets with production. No
