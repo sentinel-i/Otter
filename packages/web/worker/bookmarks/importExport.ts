@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { API_HEADERS } from '@/constants'
 import { errorResponse } from '@/utils/fetching/errorResponse'
@@ -13,13 +13,6 @@ type BookmarkInsert = typeof bookmarks.$inferInsert
 
 const MAX_IMPORT_BYTES = 25 * 1024 * 1024
 const INSERT_CHUNK_SIZE = 200
-
-// Binds the URLs as ONE text[] parameter. Interpolating the JS array directly
-// (`ANY(${urls})`) makes drizzle expand it to `ANY(($2, $3, …))`, which
-// Postgres rejects, and `inArray()` binds one parameter per URL, which breaks
-// past Postgres' 65535 bind-parameter limit on large imports.
-export const urlInList = (urls: string[]) =>
-  sql`${bookmarks.url} = ANY(${sql.param(urls)}::text[])`
 
 const getAuthed = async (context: HonoContext, scopes: string[]) => {
   const requestContext = await requireRequestContext(context, scopes)
@@ -113,7 +106,12 @@ export const importBookmarks = async (context: HonoContext) => {
     const existing = await auth.requestContext.db
       .select({ url: bookmarks.url })
       .from(bookmarks)
-      .where(and(eq(bookmarks.user, auth.userId), urlInList(parsedUrls)))
+      .where(
+        and(
+          eq(bookmarks.user, auth.userId),
+          inArray(bookmarks.url, parsedUrls),
+        ),
+      )
     const existingUrls = new Set(existing.map((row) => row.url).filter(Boolean))
     const toInsert: BookmarkInsert[] = parsed
       .filter((item) => !existingUrls.has(item.url))
