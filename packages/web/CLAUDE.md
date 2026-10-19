@@ -11,7 +11,7 @@ Run from this package (`packages/web`) unless noted.
 ```sh
 pnpm dev              # vite dev server (wrapped in `portless run`)
 pnpm build            # tsc -b && vite build  (also the deploy build step)
-pnpm deploy           # build + wrangler deploy
+pnpm run deploy       # build + wrangler deploy (`run` needed: pnpm has a built-in `deploy` command)
 pnpm preview          # build + vite preview
 
 pnpm db:generate      # drizzle-kit generate — create migration from db/schema.ts
