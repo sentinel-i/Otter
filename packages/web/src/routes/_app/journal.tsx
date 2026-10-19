@@ -338,23 +338,25 @@ function RouteComponent() {
             <strong className="text-step--1">
               {selectedIds.length} selected
             </strong>
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={() =>
-                setSelection(new Set(entries.map((entry) => entry.id)))
-              }
-            >
-              Select all ({entries.length})
-            </Button>
-            <Button
-              size="xs"
-              variant="ghost"
-              disabled={selectedIds.length === 0}
-              onClick={() => setSelection(new Set())}
-            >
-              Clear
-            </Button>
+            {entries.length > 0 && selectedIds.length === entries.length ? (
+              <Button
+                size="xs"
+                variant="ghost"
+                onClick={() => setSelection(new Set())}
+              >
+                Deselect all
+              </Button>
+            ) : (
+              <Button
+                size="xs"
+                variant="ghost"
+                onClick={() =>
+                  setSelection(new Set(entries.map((entry) => entry.id)))
+                }
+              >
+                Select all ({entries.length})
+              </Button>
+            )}
             <select
               aria-label="Move to journal"
               className="input-base focus w-auto text-step--2"
