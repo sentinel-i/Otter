@@ -14,7 +14,7 @@ interface TypeListProps {
   collections?: CollectionType[]
 }
 export const CollectionList = ({ collections }: TypeListProps) => (
-  <Collapsible>
+  <Collapsible stateKey="collections">
     <CollapsibleTrigger>
       {CONTENT.collectionsNav}{' '}
       <Text variant="count">{collections?.length}</Text>
