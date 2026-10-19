@@ -134,6 +134,22 @@ describe('parseNetscapeBookmarks', () => {
     expect(items[1].description).toBeNull()
   })
 
+  it('ignores embedded base64 favicons', () => {
+    const icon = `data:image/png;base64,${'iVBORw0KGgo'.repeat(500)}`
+    const items = parseNetscapeBookmarks(`
+      <DL><p>
+        <DT><A HREF="https://example.com/" ICON_URI="https://example.com/favicon.ico" ICON="${icon}" TAGS="a,b">Example</A>
+      </DL><p>
+    `)
+
+    expect(items).toHaveLength(1)
+    expect(items[0]).toMatchObject({
+      tags: ['a', 'b'],
+      title: 'Example',
+      url: 'https://example.com/',
+    })
+  })
+
   it('returns an empty array for content with no bookmarks', () => {
     expect(parseNetscapeBookmarks('<html><body>hello</body></html>')).toEqual(
       [],

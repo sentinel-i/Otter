@@ -110,6 +110,11 @@ const SKIPPED_PROTOCOLS = /^(?:javascript|place|data|about|chrome|file):/i
 const TOKEN_PATTERN =
   /<DT[^>]*>\s*<H3([^>]*)>([\s\S]*?)<\/H3>|<DT[^>]*>\s*<A([^>]*)>([\s\S]*?)<\/A>|<DL[^>]*>|<\/DL>|<DD[^>]*>([\s\S]*?)(?=<DT|<DL|<\/DL|<DD|<HR|$)/gi
 
+// Browsers embed each favicon as a base64 ICON attribute, often most of the
+// file's size. Otter loads favicons from the bookmark's domain instead, so
+// drop them before parsing to stay within the Worker CPU time limit.
+const ICON_ATTRIBUTE = /\sICON="[^"]*"/gi
+
 export const parseNetscapeBookmarks = (
   html: string,
 ): ParsedNetscapeBookmark[] => {
@@ -119,7 +124,9 @@ export const parseNetscapeBookmarks = (
   let pendingFolder: string | null = null
   let lastItem: ParsedNetscapeBookmark | null = null
 
-  for (const match of html.matchAll(TOKEN_PATTERN)) {
+  const content = html.replace(ICON_ATTRIBUTE, '')
+
+  for (const match of content.matchAll(TOKEN_PATTERN)) {
     const [token, h3Attrs, h3Text, aAttrs, aText, ddText] = match
 
     // a <DD> description only belongs to a bookmark when it immediately
