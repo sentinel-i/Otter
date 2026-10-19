@@ -9,6 +9,7 @@ import { MAX_CONTENT_LENGTH, summariseSystemPrompt } from './ai/summarise'
 import { titleSystemPrompt } from './ai/title'
 import { sendBlueskyPost } from './bluesky/sendBlueskyPost'
 import { getTagCounts } from './bookmarks/aggregates'
+import { batchUpdateBookmarks } from './bookmarks/batch'
 import { getAllBookmarks } from './bookmarks/getAllBookmarks'
 import { getRecentPublicBookmarks } from './bookmarks/getRecentPublicBookmarks'
 import { exportBookmarks, importBookmarks } from './bookmarks/importExport'
@@ -227,6 +228,9 @@ api.post('/bookmarks', async (c) => {
 })
 api.post('/bookmarks/import', async (c) => {
   return await importBookmarks(c)
+})
+api.post('/bookmarks/batch', async (c) => {
+  return await batchUpdateBookmarks(c)
 })
 api.get('/bookmarks/export', async (c) => {
   return await exportBookmarks(c)
