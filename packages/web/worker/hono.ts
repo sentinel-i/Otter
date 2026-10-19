@@ -30,6 +30,7 @@ import {
   upsertBlueskyIntegration,
 } from './integrations'
 import {
+  batchUpdateJournalEntries,
   createJournal,
   createJournalEntry,
   deleteJournal,
@@ -344,6 +345,9 @@ api.get('/journal-entries', async (c) => {
 })
 api.post('/journal-entries', async (c) => {
   return await createJournalEntry(c)
+})
+api.post('/journal-entries/batch', async (c) => {
+  return await batchUpdateJournalEntries(c)
 })
 api.get('/journal-entries/:id', async (c) => {
   return await getJournalEntry(c)

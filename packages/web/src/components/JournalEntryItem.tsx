@@ -22,12 +22,17 @@ interface JournalEntryItemProps {
   entry: JournalEntry
   onEdit: (entry: JournalEntry) => void
   onSelectJournal?: (journal: number) => void
+  /** Shows a checkbox for bulk editing when defined */
+  isSelected?: boolean
+  onSelectedChange?: (id: number, isSelected: boolean) => void
 }
 
 export const JournalEntryItem = ({
   entry,
   onEdit,
   onSelectJournal,
+  isSelected,
+  onSelectedChange,
 }: JournalEntryItemProps) => {
   const deleteJournalEntry = useDeleteJournalEntry()
 
@@ -39,10 +44,25 @@ export const JournalEntryItem = ({
 
   return (
     <article className="journal-entry border-b border-theme6 py-m">
-      {entry.date ? (
+      {entry.date || onSelectedChange ? (
         <Flex align="center" gap="2xs" className="mb-xs text-theme10">
-          <CalendarBlankIcon size={18} weight="duotone" />
-          <time dateTime={entry.date}>{formatEntryDate(entry.date)}</time>
+          {onSelectedChange ? (
+            <input
+              type="checkbox"
+              className="size-5 shrink-0 cursor-pointer accent-accent9"
+              aria-label={`Select entry${entry.date ? ` from ${formatEntryDate(entry.date)}` : ''}`}
+              checked={isSelected ?? false}
+              onChange={(event) =>
+                onSelectedChange(entry.id, event.target.checked)
+              }
+            />
+          ) : null}
+          {entry.date ? (
+            <>
+              <CalendarBlankIcon size={18} weight="duotone" />
+              <time dateTime={entry.date}>{formatEntryDate(entry.date)}</time>
+            </>
+          ) : null}
         </Flex>
       ) : null}
       <Markdown preventClamping>{entry.entry ?? ''}</Markdown>
