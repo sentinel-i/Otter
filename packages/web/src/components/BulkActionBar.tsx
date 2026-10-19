@@ -70,7 +70,7 @@ export const BulkActionBar = ({
   const trimmedTag = tag.trim()
 
   return (
-    <div className="bulk-action-bar card">
+    <div className="bulk-action-bar">
       <Flex gap="2xs" align="center" wrap="wrap">
         <strong className="text-step--1">{selectedIds.length} selected</strong>
         <Button size="xs" variant="ghost" onClick={onSelectAll}>

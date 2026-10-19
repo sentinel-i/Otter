@@ -49,6 +49,7 @@ interface FeedProps {
   isFetchingNextPage?: boolean
   fetchNextPage?: () => void
   shareConfig?: { kind: ShareKind; name: string }
+  allowSelection?: boolean
 }
 
 export function isBookmark(item: FeedItemModel): item is Bookmark {
@@ -78,6 +79,7 @@ export const Feed = memo(
     isFetchingNextPage = false,
     fetchNextPage,
     shareConfig,
+    allowSelection = true,
   }: FeedProps) => {
     const {
       starQuery,
@@ -96,9 +98,12 @@ export const Feed = memo(
     const { data: collectionsTags } = useSuspenseQuery(
       getCollectionsTagsOptions(),
     )
-    // Bulk editing is for bookmark feeds, but not the trash
+    // Bulk editing is for bookmark feeds, but not the trash or search
     const canSelect =
-      feedType === 'bookmarks' && showFeedOptions && !allowDeletion
+      allowSelection &&
+      feedType === 'bookmarks' &&
+      showFeedOptions &&
+      !allowDeletion
     const [isSelecting, setIsSelecting] = useState(false)
     const [selection, setSelection] = useState<Set<string>>(() => new Set())
     const bookmarkIds = useMemo(
@@ -246,15 +251,16 @@ export const Feed = memo(
               })}
             </Flex>
           ) : null}
-          {isSelecting ? (
-            <BulkActionBar
-              selectedIds={selectedIds}
-              totalCount={bookmarkIds.length}
-              onSelectAll={() => setSelection(new Set(bookmarkIds))}
-              onClear={() => setSelection(new Set())}
-            />
-          ) : null}
         </Flex>
+        {/* Outside the header so it stays stuck while scrolling the feed */}
+        {isSelecting ? (
+          <BulkActionBar
+            selectedIds={selectedIds}
+            totalCount={bookmarkIds.length}
+            onSelectAll={() => setSelection(new Set(bookmarkIds))}
+            onClear={() => setSelection(new Set())}
+          />
+        ) : null}
 
         {allowGroupByDate && groupByDate ? (
           <div className="bp2:gap-m grid gap-s">
