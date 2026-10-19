@@ -27,11 +27,16 @@ type SingleResponse<T> = {
   error: null
 }
 
+// Every status gets a column, so start each one empty: Object.groupBy only
+// creates keys for statuses that have items.
 const groupMediaByStatus = (media: Media[]) => {
-  return Object.groupBy(
-    media,
-    (item) => item.status ?? 'wishlist',
-  ) as GroupedMedia
+  const grouped: GroupedMedia = { done: [], now: [], skipped: [], wishlist: [] }
+
+  for (const item of media) {
+    grouped[item.status ?? 'wishlist'].push(item)
+  }
+
+  return grouped
 }
 
 const parseJsonResponse = async <T>(response: Response): Promise<T> => {
