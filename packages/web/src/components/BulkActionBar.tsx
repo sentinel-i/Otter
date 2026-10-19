@@ -68,22 +68,21 @@ export const BulkActionBar = ({
   })
   const isDisabled = isPending || selectedIds.length === 0
   const trimmedTag = tag.trim()
+  const isAllSelected = totalCount > 0 && selectedIds.length === totalCount
 
   return (
     <div className="bulk-action-bar">
       <Flex gap="2xs" align="center" wrap="wrap">
         <strong className="text-step--1">{selectedIds.length} selected</strong>
-        <Button size="xs" variant="ghost" onClick={onSelectAll}>
-          Select all ({totalCount})
-        </Button>
-        <Button
-          size="xs"
-          variant="ghost"
-          onClick={onClear}
-          disabled={selectedIds.length === 0}
-        >
-          Clear
-        </Button>
+        {isAllSelected ? (
+          <Button size="xs" variant="ghost" onClick={onClear}>
+            Deselect all
+          </Button>
+        ) : (
+          <Button size="xs" variant="ghost" onClick={onSelectAll}>
+            Select all ({totalCount})
+          </Button>
+        )}
       </Flex>
       <Flex gap="2xs" align="center" wrap="wrap">
         <Input

@@ -109,3 +109,41 @@ export const batchUpdateBookmarks = async (context: HonoContext) => {
     })
   }
 }
+
+/**
+ * DELETE /api/bookmarks/trash
+ * Permanently deletes every bookmark in the user's trash.
+ */
+export const emptyTrash = async (context: HonoContext) => {
+  try {
+    const requestContext = await requireRequestContext(context, [
+      'bookmarks:write',
+    ])
+
+    if (requestContext instanceof Response) {
+      return requestContext
+    }
+
+    const userId = requestContext.user?.id
+
+    if (!userId) {
+      return errorResponse({ reason: 'Not authorised', status: 401 })
+    }
+
+    const deleted = await requestContext.db
+      .delete(bookmarks)
+      .where(and(eq(bookmarks.user, userId), eq(bookmarks.status, 'inactive')))
+      .returning({ id: bookmarks.id })
+
+    return new Response(
+      JSON.stringify({ data: { deleted: deleted.length }, error: null }),
+      { headers: API_HEADERS, status: 200 },
+    )
+  } catch (error) {
+    return errorResponse({
+      error: getErrorMessage(error),
+      reason: 'Problem emptying the trash',
+      status: 400,
+    })
+  }
+}

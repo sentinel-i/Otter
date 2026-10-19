@@ -20,6 +20,7 @@ export type UIStateAction =
   | { type: 'settings_types_visible'; payload: boolean }
   | { type: 'settings_collections_visible'; payload: boolean }
   | { type: 'settings_group_by_date'; payload: boolean }
+  | { type: 'settings_open_in_new_tab'; payload: boolean }
   | { type: 'settings_top_tags_count'; payload: number | null }
   | { type: 'settings_pinned_tags'; payload: string[] }
 

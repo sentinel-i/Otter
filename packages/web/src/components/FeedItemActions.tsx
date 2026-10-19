@@ -21,6 +21,7 @@ import { deleteBookmark, updateBookmark } from '@/utils/fetching/bookmarks'
 import { getMetaOptions } from '@/utils/fetching/meta'
 import { filteredTags } from '@/utils/filteredTags'
 import { useClickBookmark } from '../hooks/useClickBookmark'
+import { useOpenInNewTab } from '../hooks/useOpenInNewTab'
 import { useToggle } from '../hooks/useToggle'
 import type { BookmarkFeedItemProps } from './BookmarkFeedItem'
 import { BookmarkForm } from './BookmarkForm'
@@ -47,6 +48,7 @@ export const FeedItemActions = ({
   const [isToggled, , setToggleState] = useToggle()
   const navigate = useNavigate()
   const handleClickRegister = useClickBookmark()
+  const { openInNewTab } = useOpenInNewTab()
   const [playSwitchOn] = useSound(switchOnSfx, { volume: 0.3 })
   const [playSwitchOff] = useSound(switchOffSfx, { volume: 0.3 })
   const dropdownItemClicked = useRef(false)
@@ -138,10 +140,15 @@ export const FeedItemActions = ({
     navigate({ to: urlJoin('/bookmark', id) })
   }
 
+  // The menu offers the opposite of how a click opens the bookmark
   const handleNavigateToBookmark = () => {
     if (url) {
       handleClickRegister(id)
-      window.open(url, '_blank')
+      if (openInNewTab) {
+        window.location.assign(url)
+      } else {
+        window.open(url, '_blank', 'noopener,noreferrer')
+      }
     }
   }
 
@@ -179,7 +186,7 @@ export const FeedItemActions = ({
                     handleNavigateToBookmark()
                   }}
                 >
-                  Open in new tab
+                  {openInNewTab ? 'Open in this tab' : 'Open in new tab'}
                   <div className="DropdownMenuItem-rightSlot">
                     <ArrowSquareOutIcon weight="duotone" />
                   </div>

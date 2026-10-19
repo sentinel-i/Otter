@@ -109,8 +109,13 @@ export const updateUserMutation = () => {
       return { previousProfile }
     },
     onSettled: async () => {
-      toast.success('User settings updated successfully')
       await queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+    },
+    onSuccess: (_, { column }) => {
+      // Opening or closing a sidebar section is not worth a notification
+      if (!column.endsWith('_visible')) {
+        toast.success('User settings updated successfully')
+      }
     },
   })
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "profiles" ADD COLUMN "settings_open_in_new_tab" boolean DEFAULT false NOT NULL;
