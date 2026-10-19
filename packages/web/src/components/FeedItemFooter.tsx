@@ -28,6 +28,7 @@ import {
 import { MINIMUM_CLICK_COUNT } from '@/constants'
 import { updateBookmark } from '@/utils/fetching/bookmarks'
 import { useClickBookmark } from '../hooks/useClickBookmark'
+import { useOpenInNewTab } from '../hooks/useOpenInNewTab'
 import { getRelativeDate } from '../utils/dates'
 import { findMatchingCollections } from '../utils/findMatchingCollections'
 import { fullPath } from '../utils/fullPath'
@@ -67,6 +68,7 @@ export const FeedItemFooter = (props: FeedItemFooterProps) => {
   } = props
   const queryClient = useQueryClient()
   const handleClickRegister = useClickBookmark()
+  const { linkProps } = useOpenInNewTab()
   const [playPopOn] = useSound(popOnSfx, { volume: 0.3 })
   const [playPopOff] = useSound(popOffSfx, { volume: 0.3 })
   const [playPopUpOn] = useSound(popUpOnSfx, { volume: 0.3 })
@@ -164,6 +166,7 @@ export const FeedItemFooter = (props: FeedItemFooterProps) => {
                   rel="external"
                   href={url}
                   onClick={() => handleClickRegister(id)}
+                  {...linkProps}
                 >
                   {simpleUrl(url)}
                 </Link>

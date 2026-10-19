@@ -1,6 +1,7 @@
 import { NoteIcon, TwitterLogoIcon } from '@phosphor-icons/react'
 
 import { useClickBookmark } from '../hooks/useClickBookmark'
+import { useOpenInNewTab } from '../hooks/useOpenInNewTab'
 import type { Bookmark, Collection } from '../types/db'
 import { cn } from '../utils/classnames'
 import { fullPath } from '../utils/fullPath'
@@ -31,6 +32,7 @@ export const BookmarkFeedItem = (props: BookmarkFeedItemProps) => {
     onSelectedChange,
   } = props
   const handleClickRegister = useClickBookmark()
+  const { linkProps } = useOpenInNewTab()
 
   return (
     <div className={cn('card feed-item', isSelected && 'is-selected')}>
@@ -51,6 +53,7 @@ export const BookmarkFeedItem = (props: BookmarkFeedItemProps) => {
                 href={url}
                 variant="feedTitle"
                 onClick={() => handleClickRegister(id)}
+                {...linkProps}
               >
                 {title}
               </Link>

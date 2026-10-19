@@ -116,6 +116,7 @@ export interface UserProfile {
   id: string
   settings_collections_visible: boolean
   settings_group_by_date: boolean | null
+  settings_open_in_new_tab: boolean
   settings_pinned_tags: string[]
   settings_tags_visible: boolean
   settings_top_tags_count: number | null

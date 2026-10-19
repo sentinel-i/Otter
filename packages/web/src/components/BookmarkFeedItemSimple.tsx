@@ -1,5 +1,6 @@
 import { NoteIcon } from '@phosphor-icons/react'
 import { useClickBookmark } from '../hooks/useClickBookmark'
+import { useOpenInNewTab } from '../hooks/useOpenInNewTab'
 import type { Bookmark } from '../types/db'
 import { FeedItemFooter } from './FeedItemFooter'
 import { Flex } from './Flex'
@@ -9,6 +10,7 @@ import { Markdown } from './Markdown'
 export const BookmarkFeedItemSimple = (props: Bookmark) => {
   const { title, url, description, note, id } = props
   const handleClickRegister = useClickBookmark()
+  const { linkProps } = useOpenInNewTab()
 
   return (
     <div className="feed-item feed-item-small">
@@ -19,6 +21,7 @@ export const BookmarkFeedItemSimple = (props: Bookmark) => {
               href={url}
               variant="feedTitle"
               onClick={() => handleClickRegister(id)}
+              {...linkProps}
             >
               {title}
             </Link>

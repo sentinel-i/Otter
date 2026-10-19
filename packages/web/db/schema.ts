@@ -305,6 +305,9 @@ export const profiles = pgTable(
       .notNull()
       .default(false),
     settingsGroupByDate: boolean('settings_group_by_date').default(false),
+    settingsOpenInNewTab: boolean('settings_open_in_new_tab')
+      .notNull()
+      .default(false),
     settingsPinnedTags: text('settings_pinned_tags')
       .array()
       .notNull()

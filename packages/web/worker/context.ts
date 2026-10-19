@@ -34,6 +34,7 @@ export const profileToRow = (profile: Profile): UserProfile => ({
   id: profile.id,
   settings_collections_visible: profile.settingsCollectionsVisible,
   settings_group_by_date: profile.settingsGroupByDate,
+  settings_open_in_new_tab: profile.settingsOpenInNewTab,
   settings_pinned_tags: profile.settingsPinnedTags,
   settings_tags_visible: profile.settingsTagsVisible,
   settings_top_tags_count:
