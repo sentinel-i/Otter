@@ -1,6 +1,7 @@
 import { HashIcon } from '@phosphor-icons/react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import { collectionTagLabel } from '@/utils/collectionTagLabel'
 import { getCollectionsTagsOptions } from '@/utils/fetching/collections'
 import { getTagsOptions } from '@/utils/fetching/tags'
 
@@ -27,7 +28,7 @@ export const useCollectionsSubNav = (collection: string) => {
               href: `/tag/${encodeURIComponent(item)}`,
               icon: <HashIcon weight="duotone" size={18} />,
               isActive: false,
-              text: item,
+              text: collectionTagLabel(item, collection),
             }
           })
       : []
