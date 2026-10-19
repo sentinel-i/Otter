@@ -3,47 +3,23 @@ import switchOnSfx from '@mrmartineau/kit/sounds/switch-on.mp3'
 import useSound from '@mrmartineau/use-sound'
 import { CaretUpDownIcon } from '@phosphor-icons/react'
 import { Collapsible as CollapsiblePrimitive } from 'radix-ui'
-import { type ComponentProps, useCallback, useState } from 'react'
+import type { ComponentProps } from 'react'
 import { Button } from '@/components/Button'
 
 import { Flex } from './Flex'
-import { useUser } from './UserProvider'
 
-interface CollapsibleProps1
-  extends ComponentProps<typeof CollapsiblePrimitive.Root> {
-  stateKey: 'tags' | 'types' | 'collections'
-}
-
+// Sections start closed and their open state is not saved: opening one is
+// instant and never waits on the server.
 export const Collapsible = ({
   children,
-  stateKey,
   ...props
-}: CollapsibleProps1) => {
-  const { profile, handleUpdateUISettings } = useUser()
-  // Toggle locally right away and save in the background: a profile refetch
-  // can briefly return the previous value (e.g. Hyperdrive's query cache),
-  // which would otherwise close the section again.
-  const [isOpen, setIsOpen] = useState(
-    () => profile?.[`settings_${stateKey}_visible`] ?? false,
-  )
+}: ComponentProps<typeof CollapsiblePrimitive.Root>) => {
   const [playSwitchOn] = useSound(switchOnSfx, { volume: 0.3 })
   const [playSwitchOff] = useSound(switchOffSfx, { volume: 0.3 })
-  const handleOpenChange = useCallback(
-    (open: boolean) => {
-      open ? playSwitchOn() : playSwitchOff()
-      setIsOpen(open)
-      handleUpdateUISettings({
-        payload: open,
-        type: `settings_${stateKey}_visible`,
-      })
-    },
-    [handleUpdateUISettings, stateKey, playSwitchOn, playSwitchOff],
-  )
 
   return (
     <CollapsiblePrimitive.Root
-      onOpenChange={handleOpenChange}
-      open={isOpen}
+      onOpenChange={(open) => (open ? playSwitchOn() : playSwitchOff())}
       {...props}
     >
       {children}

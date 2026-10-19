@@ -15,7 +15,7 @@ interface TypeListProps {
   types?: MetaType[]
 }
 export const TypeList = ({ types }: TypeListProps) => (
-  <Collapsible stateKey="types">
+  <Collapsible>
     <CollapsibleTrigger>{CONTENT.typesNav}</CollapsibleTrigger>
     <CollapsibleContent>
       <Flex gapY="3xs" direction="column">
