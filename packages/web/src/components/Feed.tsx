@@ -246,15 +246,16 @@ export const Feed = memo(
               })}
             </Flex>
           ) : null}
-          {isSelecting ? (
-            <BulkActionBar
-              selectedIds={selectedIds}
-              totalCount={bookmarkIds.length}
-              onSelectAll={() => setSelection(new Set(bookmarkIds))}
-              onClear={() => setSelection(new Set())}
-            />
-          ) : null}
         </Flex>
+        {/* Outside the header so it stays stuck while scrolling the feed */}
+        {isSelecting ? (
+          <BulkActionBar
+            selectedIds={selectedIds}
+            totalCount={bookmarkIds.length}
+            onSelectAll={() => setSelection(new Set(bookmarkIds))}
+            onClear={() => setSelection(new Set())}
+          />
+        ) : null}
 
         {allowGroupByDate && groupByDate ? (
           <div className="bp2:gap-m grid gap-s">
