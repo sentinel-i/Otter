@@ -89,7 +89,7 @@ This imports the legacy SQL dump into the new schema.
 pnpm dev              # Start dev server on port 5678
 pnpm build            # TypeScript build (tsc -b) and Vite build
 pnpm preview          # Build and preview with Vite
-pnpm deploy           # Build and deploy to Cloudflare Workers
+pnpm run deploy       # Build and deploy to Cloudflare Workers
 pnpm cf-typegen       # Generate Cloudflare Workers types (run after changing wrangler.jsonc bindings)
 pnpm db:generate      # Generate Drizzle migrations from schema changes
 pnpm db:migrate       # Run Drizzle migrations

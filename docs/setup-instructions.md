@@ -88,7 +88,7 @@ wrangler secret put WEBHOOK_SECRET
 Then deploy:
 
 ```bash
-pnpm deploy
+pnpm run deploy
 ```
 
 ## 7. Optional Raycast OAuth setup
