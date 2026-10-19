@@ -2,6 +2,7 @@ import { NoteIcon, TwitterLogoIcon } from '@phosphor-icons/react'
 
 import { useClickBookmark } from '../hooks/useClickBookmark'
 import type { Bookmark, Collection } from '../types/db'
+import { cn } from '../utils/classnames'
 import { fullPath } from '../utils/fullPath'
 import { FeedItemFooter } from './FeedItemFooter'
 import { Flex } from './Flex'
@@ -12,15 +13,37 @@ export interface BookmarkFeedItemProps extends Bookmark {
   allowDeletion?: boolean
   preventMarkdownClamping?: boolean
   collections?: Collection[]
+  /** Shows a checkbox for bulk editing when defined */
+  isSelected?: boolean
+  onSelectedChange?: (id: string, isSelected: boolean) => void
 }
 
 export const BookmarkFeedItem = (props: BookmarkFeedItemProps) => {
-  const { title, url, description, note, id, tweet, image } = props
+  const {
+    title,
+    url,
+    description,
+    note,
+    id,
+    tweet,
+    image,
+    isSelected,
+    onSelectedChange,
+  } = props
   const handleClickRegister = useClickBookmark()
 
   return (
-    <div className="card feed-item">
+    <div className={cn('card feed-item', isSelected && 'is-selected')}>
       <div className="feed-item-cols">
+        {onSelectedChange ? (
+          <input
+            type="checkbox"
+            className="feed-item-checkbox"
+            aria-label={`Select ${title ?? url ?? 'bookmark'}`}
+            checked={isSelected ?? false}
+            onChange={(event) => onSelectedChange(id, event.target.checked)}
+          />
+        ) : null}
         <div className="feed-item-content">
           {url && title ? (
             <div>

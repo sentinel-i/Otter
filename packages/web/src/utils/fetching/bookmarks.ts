@@ -1,4 +1,5 @@
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
+import type { BatchAction } from 'worker/bookmarks/batch'
 import { DEFAULT_API_RESPONSE_LIMIT } from '@/constants'
 import type { Bookmark, BookmarkFormValues } from '@/types/db'
 import { type ApiParametersQuery, apiParameters } from './apiParameters'
@@ -151,6 +152,20 @@ export const deleteBookmark = async (
   )
 
   return await parseJsonResponse<SingleResponse<Bookmark>>(response)
+}
+
+export const batchUpdateBookmarks = async (
+  ids: string[],
+  action: BatchAction,
+) => {
+  const response = await fetch('/api/bookmarks/batch', {
+    body: JSON.stringify({ action, ids }),
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    method: 'POST',
+  })
+
+  return await parseJsonResponse<SingleResponse<{ updated: number }>>(response)
 }
 
 export const incrementBookmarkClickCount = async (id: string) => {
