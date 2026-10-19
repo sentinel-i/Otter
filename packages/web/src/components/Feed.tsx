@@ -49,7 +49,6 @@ interface FeedProps {
   isFetchingNextPage?: boolean
   fetchNextPage?: () => void
   shareConfig?: { kind: ShareKind; name: string }
-  allowSelection?: boolean
 }
 
 export function isBookmark(item: FeedItemModel): item is Bookmark {
@@ -79,7 +78,6 @@ export const Feed = memo(
     isFetchingNextPage = false,
     fetchNextPage,
     shareConfig,
-    allowSelection = true,
   }: FeedProps) => {
     const {
       starQuery,
@@ -98,12 +96,9 @@ export const Feed = memo(
     const { data: collectionsTags } = useSuspenseQuery(
       getCollectionsTagsOptions(),
     )
-    // Bulk editing is for bookmark feeds, but not the trash or search
+    // Bulk editing is for bookmark feeds, but not the trash
     const canSelect =
-      allowSelection &&
-      feedType === 'bookmarks' &&
-      showFeedOptions &&
-      !allowDeletion
+      feedType === 'bookmarks' && showFeedOptions && !allowDeletion
     const [isSelecting, setIsSelecting] = useState(false)
     const [selection, setSelection] = useState<Set<string>>(() => new Set())
     const bookmarkIds = useMemo(

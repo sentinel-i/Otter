@@ -46,7 +46,6 @@ function RouteComponent() {
       title={`${CONTENT.searchTitle}: ${q}`}
       icon={<MagnifyingGlassIcon weight="duotone" size={24} />}
       feedType="bookmarks"
-      allowSelection={false}
       from={`/search?q=${encodeURIComponent(q)}`}
       hasNextPage={hasNextPage}
       isFetchingNextPage={isFetchingNextPage}
