@@ -3,7 +3,7 @@ import switchOnSfx from '@mrmartineau/kit/sounds/switch-on.mp3'
 import useSound from '@mrmartineau/use-sound'
 import { CaretUpDownIcon } from '@phosphor-icons/react'
 import { Collapsible as CollapsiblePrimitive } from 'radix-ui'
-import { type ComponentProps, useCallback } from 'react'
+import { type ComponentProps, useCallback, useState } from 'react'
 import { Button } from '@/components/Button'
 
 import { Flex } from './Flex'
@@ -20,11 +20,18 @@ export const Collapsible = ({
   ...props
 }: CollapsibleProps1) => {
   const { profile, handleUpdateUISettings } = useUser()
+  // Toggle locally right away and save in the background: a profile refetch
+  // can briefly return the previous value (e.g. Hyperdrive's query cache),
+  // which would otherwise close the section again.
+  const [isOpen, setIsOpen] = useState(
+    () => profile?.[`settings_${stateKey}_visible`] ?? false,
+  )
   const [playSwitchOn] = useSound(switchOnSfx, { volume: 0.3 })
   const [playSwitchOff] = useSound(switchOffSfx, { volume: 0.3 })
   const handleOpenChange = useCallback(
     (open: boolean) => {
       open ? playSwitchOn() : playSwitchOff()
+      setIsOpen(open)
       handleUpdateUISettings({
         payload: open,
         type: `settings_${stateKey}_visible`,
@@ -36,7 +43,7 @@ export const Collapsible = ({
   return (
     <CollapsiblePrimitive.Root
       onOpenChange={handleOpenChange}
-      open={profile ? profile[`settings_${stateKey}_visible`] : false}
+      open={isOpen}
       {...props}
     >
       {children}
