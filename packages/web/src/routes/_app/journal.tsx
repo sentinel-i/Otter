@@ -28,6 +28,7 @@ import {
   useBatchUpdateJournalEntries,
   useCreateJournal,
   useCreateJournalEntry,
+  useDeleteJournal,
   useUpdateJournalEntry,
 } from '@/utils/fetching/journal'
 
@@ -107,6 +108,10 @@ function RouteComponent() {
   const createEntryMutation = useCreateJournalEntry()
   const updateEntryMutation = useUpdateJournalEntry()
   const batchMutation = useBatchUpdateJournalEntries()
+  const deleteJournalMutation = useDeleteJournal()
+  const activeJournal = journals.find(
+    (journalItem) => journalItem.id === journalFilter,
+  )
   const [isSelecting, setIsSelecting] = useState(false)
   const [selection, setSelection] = useState<Set<number>>(() => new Set())
 
@@ -134,6 +139,19 @@ function RouteComponent() {
       }
       return next
     })
+  }
+
+  const handleDeleteJournal = () => {
+    if (
+      activeJournal &&
+      confirm(
+        `Delete the journal "${activeJournal.name}"? Its ${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} will be kept, without a journal.`,
+      )
+    ) {
+      deleteJournalMutation.mutate(activeJournal.id, {
+        onSuccess: () => setJournalFilter(undefined),
+      })
+    }
   }
 
   const handleMoveEntries = (journal: number) => {
@@ -190,8 +208,37 @@ function RouteComponent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-xs">
         <h1 className="text-2xl font-bold">Journal</h1>
+        <div className="flex gap-3xs">
+          {activeJournal ? (
+            <Button
+              size="xs"
+              variant="ghost"
+              disabled={deleteJournalMutation.isPending}
+              onClick={handleDeleteJournal}
+            >
+              <TrashIcon size={16} weight="duotone" /> Delete journal
+            </Button>
+          ) : null}
+          {entries.length ? (
+            <Button
+              size="xs"
+              variant="ghost"
+              aria-pressed={isSelecting}
+              onClick={() => {
+                setIsSelecting((prev) => !prev)
+                setSelection(new Set())
+              }}
+            >
+              <CheckSquareIcon
+                size={16}
+                weight={isSelecting ? 'fill' : 'duotone'}
+              />{' '}
+              Select
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <div className="flex gap-4 justify-between flex-wrap">
@@ -229,22 +276,6 @@ function RouteComponent() {
           <div />
         )}
         <div className="flex gap-xs">
-          {entries.length ? (
-            <Button
-              variant="outline"
-              aria-pressed={isSelecting}
-              onClick={() => {
-                setIsSelecting((prev) => !prev)
-                setSelection(new Set())
-              }}
-            >
-              <CheckSquareIcon
-                size={18}
-                weight={isSelecting ? 'fill' : 'duotone'}
-              />
-              Select
-            </Button>
-          ) : null}
           <Dialog
             open={isJournalDialogOpen}
             onOpenChange={setIsJournalDialogOpen}

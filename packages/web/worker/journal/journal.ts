@@ -233,7 +233,8 @@ export const updateJournal = async (context: HonoContext) => {
 
 /**
  * DELETE /api/journals/:id
- * Soft-deletes a journal by setting its status to 'deleted'.
+ * Soft-deletes a journal by setting its status to 'deleted'. Its entries
+ * are kept, without a journal.
  */
 export const deleteJournal = async (context: HonoContext) => {
   try {
@@ -257,6 +258,16 @@ export const deleteJournal = async (context: HonoContext) => {
     if (!item) {
       return notFoundResponse('Journal not found or access denied')
     }
+
+    await auth.requestContext.db
+      .update(journalEntries)
+      .set({ journal: null })
+      .where(
+        and(
+          eq(journalEntries.journal, item.id),
+          eq(journalEntries.owner, auth.userId),
+        ),
+      )
 
     return new Response(
       JSON.stringify({ data: journalToRow(item), error: null }),
