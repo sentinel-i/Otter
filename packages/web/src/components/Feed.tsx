@@ -49,6 +49,8 @@ interface FeedProps {
   isFetchingNextPage?: boolean
   fetchNextPage?: () => void
   shareConfig?: { kind: ShareKind; name: string }
+  /** Extra buttons shown at the end of the header */
+  actions?: ReactNode
 }
 
 export function isBookmark(item: FeedItemModel): item is Bookmark {
@@ -78,6 +80,7 @@ export const Feed = memo(
     isFetchingNextPage = false,
     fetchNextPage,
     shareConfig,
+    actions,
   }: FeedProps) => {
     const {
       starQuery,
@@ -154,7 +157,7 @@ export const Feed = memo(
               {icon}
               {title}
             </h3>
-            {showFeedOptions || shareConfig ? (
+            {showFeedOptions || shareConfig || actions ? (
               <Flex gap="3xs">
                 {showFeedOptions ? (
                   <>
@@ -229,6 +232,7 @@ export const Feed = memo(
                     name={shareConfig.name}
                   />
                 ) : null}
+                {actions}
               </Flex>
             ) : null}
           </Flex>

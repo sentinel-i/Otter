@@ -168,6 +168,15 @@ export const batchUpdateBookmarks = async (
   return await parseJsonResponse<SingleResponse<{ updated: number }>>(response)
 }
 
+export const emptyTrash = async () => {
+  const response = await fetch('/api/bookmarks/trash', {
+    credentials: 'include',
+    method: 'DELETE',
+  })
+
+  return await parseJsonResponse<SingleResponse<{ deleted: number }>>(response)
+}
+
 export const incrementBookmarkClickCount = async (id: string) => {
   const response = await fetch(`/api/bookmarks/${id}/click`, {
     credentials: 'include',
