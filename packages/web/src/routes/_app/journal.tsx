@@ -1,4 +1,10 @@
-import { CircleIcon, NotebookIcon, PlusCircleIcon } from '@phosphor-icons/react'
+import {
+  CheckSquareIcon,
+  CircleIcon,
+  NotebookIcon,
+  PlusCircleIcon,
+  TrashIcon,
+} from '@phosphor-icons/react'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
@@ -19,6 +25,7 @@ import type {
 import {
   getJournalEntriesOptions,
   getJournalsOptions,
+  useBatchUpdateJournalEntries,
   useCreateJournal,
   useCreateJournalEntry,
   useUpdateJournalEntry,
@@ -99,6 +106,9 @@ function RouteComponent() {
   const journals = journalsResponse?.data ?? []
   const createEntryMutation = useCreateJournalEntry()
   const updateEntryMutation = useUpdateJournalEntry()
+  const batchMutation = useBatchUpdateJournalEntries()
+  const [isSelecting, setIsSelecting] = useState(false)
+  const [selection, setSelection] = useState<Set<number>>(() => new Set())
 
   const entries = useMemo(() => {
     const allEntries = entriesResponse?.data ?? []
@@ -109,6 +119,42 @@ function RouteComponent() {
 
     return allEntries.filter((item) => item.journal === journalFilter)
   }, [entriesResponse, journalFilter])
+  // Only act on selected entries that are still listed
+  const selectedIds = entries
+    .filter((entry) => selection.has(entry.id))
+    .map((entry) => entry.id)
+
+  const handleSelectedChange = (id: number, isSelected: boolean) => {
+    setSelection((prev) => {
+      const next = new Set(prev)
+      if (isSelected) {
+        next.add(id)
+      } else {
+        next.delete(id)
+      }
+      return next
+    })
+  }
+
+  const handleMoveEntries = (journal: number) => {
+    batchMutation.mutate({
+      action: { journal, type: 'move' },
+      ids: selectedIds,
+    })
+  }
+
+  const handleDeleteEntries = () => {
+    if (
+      confirm(
+        `Are you sure you want to delete ${selectedIds.length} journal ${selectedIds.length === 1 ? 'entry' : 'entries'}?`,
+      )
+    ) {
+      batchMutation.mutate(
+        { action: { type: 'delete' }, ids: selectedIds },
+        { onSuccess: () => setSelection(new Set()) },
+      )
+    }
+  }
 
   const handleCreateEntry = (formData: JournalEntryInsert) => {
     createEntryMutation.mutate(formData, {
@@ -183,6 +229,22 @@ function RouteComponent() {
           <div />
         )}
         <div className="flex gap-xs">
+          {entries.length ? (
+            <Button
+              variant="outline"
+              aria-pressed={isSelecting}
+              onClick={() => {
+                setIsSelecting((prev) => !prev)
+                setSelection(new Set())
+              }}
+            >
+              <CheckSquareIcon
+                size={18}
+                weight={isSelecting ? 'fill' : 'duotone'}
+              />
+              Select
+            </Button>
+          ) : null}
           <Dialog
             open={isJournalDialogOpen}
             onOpenChange={setIsJournalDialogOpen}
@@ -239,6 +301,59 @@ function RouteComponent() {
         </div>
       </div>
 
+      {isSelecting ? (
+        <div className="card sticky top-2xs z-10 max-w-prose">
+          <div className="flex flex-wrap items-center gap-2xs">
+            <strong className="text-step--1">
+              {selectedIds.length} selected
+            </strong>
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={() =>
+                setSelection(new Set(entries.map((entry) => entry.id)))
+              }
+            >
+              Select all ({entries.length})
+            </Button>
+            <Button
+              size="xs"
+              variant="ghost"
+              disabled={selectedIds.length === 0}
+              onClick={() => setSelection(new Set())}
+            >
+              Clear
+            </Button>
+            <select
+              aria-label="Move to journal"
+              className="input-base focus w-auto text-step--2"
+              disabled={batchMutation.isPending || selectedIds.length === 0}
+              onChange={(event) => {
+                if (event.target.value) {
+                  handleMoveEntries(Number(event.target.value))
+                }
+              }}
+              value=""
+            >
+              <option value="">Move to…</option>
+              {journals.map((journalItem) => (
+                <option key={journalItem.id} value={journalItem.id}>
+                  {journalItem.name}
+                </option>
+              ))}
+            </select>
+            <Button
+              size="xs"
+              variant="ghost"
+              disabled={batchMutation.isPending || selectedIds.length === 0}
+              onClick={handleDeleteEntries}
+            >
+              <TrashIcon size={16} weight="duotone" /> Delete
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="max-w-prose">
         {entries.length ? (
           entries.map((entry) => (
@@ -247,6 +362,12 @@ function RouteComponent() {
               entry={entry}
               onEdit={handleEditEntry}
               onSelectJournal={setJournalFilter}
+              {...(isSelecting
+                ? {
+                    isSelected: selection.has(entry.id),
+                    onSelectedChange: handleSelectedChange,
+                  }
+                : {})}
             />
           ))
         ) : (

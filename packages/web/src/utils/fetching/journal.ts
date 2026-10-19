@@ -4,6 +4,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import type { JournalEntryBatchAction } from 'worker/journal/journal'
 import type {
   Journal,
   JournalEntry,
@@ -252,6 +253,43 @@ export const useDeleteJournalEntry = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journalEntries'] })
       toast.success('Journal entry deleted successfully')
+    },
+  })
+}
+
+export const useBatchUpdateJournalEntries = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({
+      ids,
+      action,
+    }: {
+      ids: number[]
+      action: JournalEntryBatchAction
+    }) => {
+      const response = await fetch('/api/journal-entries/batch', {
+        body: JSON.stringify({ action, ids }),
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      })
+
+      return await parseJsonResponse<SingleResponse<{ updated: number }>>(
+        response,
+      )
+    },
+    onError: (error) => {
+      const errorMessage = getErrorMessage(error)
+      toast.error('Failed to update journal entries', {
+        description: errorMessage,
+      })
+    },
+    onSuccess: ({ data }) => {
+      queryClient.invalidateQueries({ queryKey: ['journalEntries'] })
+      toast.success(
+        `Updated ${data.updated} journal ${data.updated === 1 ? 'entry' : 'entries'}`,
+      )
     },
   })
 }
