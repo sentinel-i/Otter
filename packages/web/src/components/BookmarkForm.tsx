@@ -148,8 +148,11 @@ export const BookmarkForm = ({
     mutate: handleAiDescriptionMutate,
     isPending: isDescriptionAiLoading,
   } = useMutation({
-    // @ts-expect-error - TODO: fix this
-    ...rewriteDescriptionOptions(watchDescription, watchTitle),
+    ...rewriteDescriptionOptions(
+      watchDescription,
+      watchTitle ?? undefined,
+      watchUrl ?? undefined,
+    ),
     onSuccess: (data) => {
       setFieldValue('description', data.response)
     },
@@ -202,9 +205,7 @@ export const BookmarkForm = ({
   // Scraping
   const scrapeMutation = useScrapeMutation()
   const { profile } = useUser()
-  const shouldTranslateDescription = Boolean(
-    profile?.settings_description_language,
-  )
+  const shouldWriteDescription = Boolean(profile?.settings_description_language)
 
   const handleScrape = useCallback(
     (url: string) => {
@@ -216,9 +217,14 @@ export const BookmarkForm = ({
           lastScrapedUrl.current = normalizeUrl(data.url ?? url)
           setFieldValue('title', data.title)
           setFieldValue('description', data.description)
-          // The description rewriter translates when the profile asks for it
-          if (shouldTranslateDescription && data.description) {
-            rewriteDescription(data.description, data.title ?? undefined)
+          // With a description language set, the AI writes the description
+          // in it, even when the page has none
+          if (shouldWriteDescription) {
+            rewriteDescription(
+              data.description ?? '',
+              data.title ?? undefined,
+              data.url ?? url,
+            )
               .then(({ response }) => {
                 if (response) {
                   setFieldValue('description', response)
@@ -242,12 +248,7 @@ export const BookmarkForm = ({
         },
       })
     },
-    [
-      scrapeMutation,
-      setFieldValue,
-      shouldTranslateDescription,
-      triggerClassify,
-    ],
+    [scrapeMutation, setFieldValue, shouldWriteDescription, triggerClassify],
   )
 
   const handleSubmitForm = async (formData: BookmarkFormValues) => {

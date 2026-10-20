@@ -25,9 +25,10 @@ export const rewriteTitleOptions = (title: string | null) => {
 export const rewriteDescription = async (
   description: string,
   title?: string,
+  url?: string,
 ): Promise<AiGenerateResponse> => {
   const response = await fetch('/api/ai/description', {
-    body: JSON.stringify({ prompt: description, title }),
+    body: JSON.stringify({ prompt: description, title, url }),
     method: 'POST',
   })
   return response.json()
@@ -36,13 +37,14 @@ export const rewriteDescription = async (
 export const rewriteDescriptionOptions = (
   description: string | null,
   title: string | undefined = '',
+  url?: string,
 ) => {
   if (!description) {
     return null
   }
 
   return mutationOptions({
-    mutationFn: () => rewriteDescription(description, title),
+    mutationFn: () => rewriteDescription(description, title, url),
     mutationKey: ['ai', 'description'],
   })
 }

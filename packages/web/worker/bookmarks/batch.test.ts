@@ -12,6 +12,8 @@ describe('batchUpdateSchema', () => {
       { type: 'public', value: false },
       { type: 'setType', value: 'recipe' },
       { type: 'trash' },
+      { type: 'clearDescription' },
+      { type: 'clearImage' },
     ]) {
       expect(batchUpdateSchema.safeParse({ action, ids: [id] }).success).toBe(
         true,

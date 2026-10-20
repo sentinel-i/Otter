@@ -60,13 +60,13 @@ const fetchRetryingRateLimit = async (
 
 /**
  * Scrapes a bookmark's page again and returns the fields to update: its
- * description (translated by the AI when `translate` is set) and image. Fields
- * the page does not provide are left out so they keep their current value.
+ * description (written by the AI when `writeDescription` is set) and image.
+ * Fields with nothing new are left out so they keep their current value.
  */
 export const scrapeBookmarkUpdate = async (
   url: string,
   title: string | null,
-  translate: boolean,
+  writeDescription: boolean,
 ): Promise<{ description?: string; image?: string }> => {
   const response = await fetchRetryingRateLimit(
     urlJoin('/api/scrape', { query: { url } }),
@@ -83,22 +83,23 @@ export const scrapeBookmarkUpdate = async (
 
   if (data.description) {
     update.description = data.description
+  }
 
-    if (translate) {
-      const aiResponse = await fetchRetryingRateLimit('/api/ai/description', {
-        body: JSON.stringify({
-          prompt: data.description,
-          title: title ?? undefined,
-        }),
-        method: 'POST',
-      })
-      const { response: translated } = (await aiResponse.json()) as {
-        response?: string
-      }
+  if (writeDescription) {
+    const aiResponse = await fetchRetryingRateLimit('/api/ai/description', {
+      body: JSON.stringify({
+        prompt: data.description ?? '',
+        title: title ?? undefined,
+        url: data.url ?? url,
+      }),
+      method: 'POST',
+    })
+    const { response: written } = (await aiResponse.json()) as {
+      response?: string
+    }
 
-      if (aiResponse.ok && translated) {
-        update.description = translated
-      }
+    if (aiResponse.ok && written) {
+      update.description = written
     }
   }
 

@@ -306,6 +306,10 @@ export const profiles = pgTable(
       .default(false),
     settingsDescriptionLanguage: text('settings_description_language'),
     settingsGroupByDate: boolean('settings_group_by_date').default(false),
+    settingsHiddenSections: text('settings_hidden_sections')
+      .array()
+      .notNull()
+      .default(sql`ARRAY[]::text[]`),
     settingsOpenInNewTab: boolean('settings_open_in_new_tab')
       .notNull()
       .default(false),

@@ -3,7 +3,7 @@ import type { Context } from 'hono'
 import { z } from 'zod'
 import { profiles } from '../db/schema'
 import { API_HEADERS } from '../src/constants'
-import { DESCRIPTION_LANGUAGES } from '../src/types/db'
+import { DESCRIPTION_LANGUAGES, SIDEBAR_SECTIONS } from '../src/types/db'
 import { errorResponse } from '../src/utils/fetching/errorResponse'
 import { getErrorMessage } from '../src/utils/get-error-message'
 import { getProfileById, requireRequestContext } from './context'
@@ -35,6 +35,10 @@ const updateProfileSchema = z.discriminatedUnion('column', [
   }),
   z.object({ column: z.literal('settings_group_by_date'), value: z.boolean() }),
   z.object({
+    column: z.literal('settings_hidden_sections'),
+    value: z.array(z.enum(SIDEBAR_SECTIONS)),
+  }),
+  z.object({
     column: z.literal('settings_open_in_new_tab'),
     value: z.boolean(),
   }),
@@ -60,6 +64,8 @@ const getProfileUpdate = (update: z.infer<typeof updateProfileSchema>) => {
       return { settingsDescriptionLanguage: update.value }
     case 'settings_group_by_date':
       return { settingsGroupByDate: update.value }
+    case 'settings_hidden_sections':
+      return { settingsHiddenSections: update.value }
     case 'settings_open_in_new_tab':
       return { settingsOpenInNewTab: update.value }
     case 'settings_pinned_tags':

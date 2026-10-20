@@ -79,7 +79,7 @@ export const BulkActionBar = ({
   const { isPending: isScraping, mutate: scrape } = useMutation({
     mutationFn: async () => {
       const targets = selectedBookmarks.filter((bookmark) => bookmark.url)
-      const translate = Boolean(profile?.settings_description_language)
+      const writeDescription = Boolean(profile?.settings_description_language)
       const toastId = toast.loading(`Scraping 0/${targets.length}…`)
       let updated = 0
       let failed = 0
@@ -92,7 +92,7 @@ export const BulkActionBar = ({
           const update = await scrapeBookmarkUpdate(
             bookmark.url as string,
             bookmark.title,
-            translate,
+            writeDescription,
           )
 
           if (Object.keys(update).length) {
@@ -123,10 +123,34 @@ export const BulkActionBar = ({
   const trimmedTag = tag.trim()
   const isAllSelected = totalCount > 0 && selectedIds.length === totalCount
 
+  // Each toggle offers whatever the selection is not entirely already
+  const isAllStarred =
+    selectedBookmarks.length > 0 &&
+    selectedBookmarks.every((bookmark) => bookmark.star)
+  const isAllPublic =
+    selectedBookmarks.length > 0 &&
+    selectedBookmarks.every((bookmark) => bookmark.public)
+
+  const handleRemove = (field: 'description' | 'image') => {
+    const count = selectedIds.length
+
+    if (
+      confirm(
+        `Remove the ${field} of ${count} bookmark${count === 1 ? '' : 's'}? This cannot be undone.`,
+      )
+    ) {
+      mutate({
+        type: field === 'description' ? 'clearDescription' : 'clearImage',
+      })
+    }
+  }
+
   return (
     <div className="bulk-action-bar">
-      <Flex gap="2xs" align="center" wrap="wrap">
-        <strong className="text-step--1">{selectedIds.length} selected</strong>
+      <Flex gap="3xs" align="center" wrap="wrap">
+        <strong className="px-2xs text-step--1">
+          {selectedIds.length} selected
+        </strong>
         {isAllSelected ? (
           <Button size="xs" variant="ghost" onClick={onClear}>
             Deselect all
@@ -136,8 +160,47 @@ export const BulkActionBar = ({
             Select all ({totalCount})
           </Button>
         )}
+        <Button
+          size="xs"
+          variant="ghost"
+          disabled={isDisabled}
+          onClick={() => mutate({ type: 'star', value: !isAllStarred })}
+        >
+          <StarIcon size={16} weight={isAllStarred ? 'duotone' : 'fill'} />{' '}
+          {isAllStarred ? 'Unstar' : 'Star'}
+        </Button>
+        <Button
+          size="xs"
+          variant="ghost"
+          disabled={isDisabled}
+          onClick={() => mutate({ type: 'public', value: !isAllPublic })}
+        >
+          {isAllPublic ? (
+            <EyeSlashIcon size={16} weight="duotone" />
+          ) : (
+            <EyeIcon size={16} weight="duotone" />
+          )}{' '}
+          {isAllPublic ? 'Private' : 'Public'}
+        </Button>
+        <Button
+          size="xs"
+          variant="ghost"
+          disabled={isDisabled}
+          onClick={() => scrape()}
+          title="Update the description and image from each page"
+        >
+          <DownloadIcon size={16} weight="duotone" /> Scrape
+        </Button>
+        <Button
+          size="xs"
+          variant="ghost"
+          disabled={isDisabled}
+          onClick={() => mutate({ type: 'trash' })}
+        >
+          <TrashIcon size={16} weight="duotone" /> Trash
+        </Button>
       </Flex>
-      <Flex gap="2xs" align="center" wrap="wrap">
+      <Flex gap="3xs" align="center" wrap="wrap">
         <Input
           aria-label="Tag"
           className="bulk-action-tag-input"
@@ -156,88 +219,57 @@ export const BulkActionBar = ({
           variant="ghost"
           disabled={isDisabled || !trimmedTag}
           onClick={() => mutate({ tag: trimmedTag, type: 'addTag' })}
+          aria-label="Add tag"
+          title="Add tag"
         >
-          <PlusCircleIcon size={16} weight="duotone" /> Add tag
+          <PlusCircleIcon size={16} weight="duotone" />
         </Button>
         <Button
           size="xs"
           variant="ghost"
           disabled={isDisabled || !trimmedTag}
           onClick={() => mutate({ tag: trimmedTag, type: 'removeTag' })}
+          aria-label="Remove tag"
+          title="Remove tag"
         >
-          <MinusCircleIcon size={16} weight="duotone" /> Remove tag
-        </Button>
-      </Flex>
-      <Flex gap="2xs" align="center" wrap="wrap">
-        <Button
-          size="xs"
-          variant="ghost"
-          disabled={isDisabled}
-          onClick={() => mutate({ type: 'star', value: true })}
-        >
-          <StarIcon size={16} weight="fill" /> Star
-        </Button>
-        <Button
-          size="xs"
-          variant="ghost"
-          disabled={isDisabled}
-          onClick={() => mutate({ type: 'star', value: false })}
-        >
-          <StarIcon size={16} weight="duotone" /> Unstar
-        </Button>
-        <Button
-          size="xs"
-          variant="ghost"
-          disabled={isDisabled}
-          onClick={() => mutate({ type: 'public', value: true })}
-        >
-          <EyeIcon size={16} weight="duotone" /> Public
-        </Button>
-        <Button
-          size="xs"
-          variant="ghost"
-          disabled={isDisabled}
-          onClick={() => mutate({ type: 'public', value: false })}
-        >
-          <EyeSlashIcon size={16} weight="duotone" /> Private
+          <MinusCircleIcon size={16} weight="duotone" />
         </Button>
         <select
           aria-label="Set type"
           className="input-base focus bulk-action-select text-step--2"
           disabled={isDisabled}
-          onChange={(event) => {
-            const value = event.target.value as BookmarkType
-
-            if (value) {
-              mutate({ type: 'setType', value })
-            }
-          }}
+          onChange={(event) =>
+            mutate({
+              type: 'setType',
+              value: event.target.value as BookmarkType,
+            })
+          }
           value=""
         >
-          <option value="">Set type…</option>
+          <option value="" disabled hidden>
+            Set type…
+          </option>
           {BOOKMARK_TYPES.map((type) => (
             <option key={type} value={type}>
               {type}
             </option>
           ))}
         </select>
-        <Button
-          size="xs"
-          variant="ghost"
+        <select
+          aria-label="Remove"
+          className="input-base focus bulk-action-select text-step--2"
           disabled={isDisabled}
-          onClick={() => scrape()}
-          title="Update the description and image from each page"
+          onChange={(event) =>
+            handleRemove(event.target.value as 'description' | 'image')
+          }
+          value=""
         >
-          <DownloadIcon size={16} weight="duotone" /> Scrape
-        </Button>
-        <Button
-          size="xs"
-          variant="ghost"
-          disabled={isDisabled}
-          onClick={() => mutate({ type: 'trash' })}
-        >
-          <TrashIcon size={16} weight="duotone" /> Move to trash
-        </Button>
+          <option value="" disabled hidden>
+            Remove…
+          </option>
+          <option value="description">Description</option>
+          <option value="image">Image</option>
+        </select>
       </Flex>
     </div>
   )

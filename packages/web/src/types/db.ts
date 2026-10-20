@@ -114,6 +114,22 @@ export interface BookmarkFormValues
 export const DESCRIPTION_LANGUAGES = ['French'] as const
 export type DescriptionLanguage = (typeof DESCRIPTION_LANGUAGES)[number]
 
+/** Sidebar sections that can be hidden from Settings > Preferences */
+export const SIDEBAR_SECTIONS = [
+  'dashboard',
+  'public',
+  'stars',
+  'top',
+  'toots',
+  'tweets',
+  'types',
+  'tags',
+  'collections',
+  'media',
+  'journal',
+] as const
+export type SidebarSection = (typeof SIDEBAR_SECTIONS)[number]
+
 export interface UserProfile {
   api_key: string | null
   avatar_url: string | null
@@ -121,6 +137,7 @@ export interface UserProfile {
   settings_collections_visible: boolean
   settings_description_language: DescriptionLanguage | null
   settings_group_by_date: boolean | null
+  settings_hidden_sections: SidebarSection[]
   settings_open_in_new_tab: boolean
   settings_pinned_tags: string[]
   settings_tags_visible: boolean

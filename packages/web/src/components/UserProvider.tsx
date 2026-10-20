@@ -21,6 +21,10 @@ export type UIStateAction =
   | { type: 'settings_collections_visible'; payload: boolean }
   | { type: 'settings_group_by_date'; payload: boolean }
   | {
+      type: 'settings_hidden_sections'
+      payload: UserProfile['settings_hidden_sections']
+    }
+  | {
       type: 'settings_description_language'
       payload: UserProfile['settings_description_language']
     }
