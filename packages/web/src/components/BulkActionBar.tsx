@@ -1,4 +1,5 @@
 import {
+  DownloadIcon,
   EyeIcon,
   EyeSlashIcon,
   MinusCircleIcon,
@@ -11,12 +12,17 @@ import { useId, useState } from 'react'
 import { toast } from 'sonner'
 import type { BatchAction } from 'worker/bookmarks/batch'
 import { Button } from '@/components/Button'
-import type { BookmarkType } from '@/types/db'
-import { batchUpdateBookmarks } from '@/utils/fetching/bookmarks'
+import type { Bookmark, BookmarkType } from '@/types/db'
+import {
+  batchUpdateBookmarks,
+  updateBookmark,
+} from '@/utils/fetching/bookmarks'
+import { scrapeBookmarkUpdate } from '@/utils/fetching/scrape'
 import { getTagsOptions } from '@/utils/fetching/tags'
 import { getErrorMessage } from '@/utils/get-error-message'
 import { Flex } from './Flex'
 import { Input } from './Input'
+import { useUser } from './UserProvider'
 
 const BOOKMARK_TYPES: BookmarkType[] = [
   'link',
@@ -34,19 +40,21 @@ const BOOKMARK_TYPES: BookmarkType[] = [
 ]
 
 interface BulkActionBarProps {
-  selectedIds: string[]
+  selectedBookmarks: Bookmark[]
   totalCount: number
   onSelectAll: () => void
   onClear: () => void
 }
 
 export const BulkActionBar = ({
-  selectedIds,
+  selectedBookmarks,
   totalCount,
   onSelectAll,
   onClear,
 }: BulkActionBarProps) => {
   const queryClient = useQueryClient()
+  const { profile } = useUser()
+  const selectedIds = selectedBookmarks.map((bookmark) => bookmark.id)
   const tagListId = useId()
   const [tag, setTag] = useState('')
   const { data: tags } = useQuery(getTagsOptions())
@@ -66,7 +74,52 @@ export const BulkActionBar = ({
       await queryClient.invalidateQueries()
     },
   })
-  const isDisabled = isPending || selectedIds.length === 0
+  // Scraping runs one bookmark at a time from the browser: each page is a
+  // separate fetch, so the Worker never scrapes many pages in one request
+  const { isPending: isScraping, mutate: scrape } = useMutation({
+    mutationFn: async () => {
+      const targets = selectedBookmarks.filter((bookmark) => bookmark.url)
+      const translate = Boolean(profile?.settings_description_language)
+      const toastId = toast.loading(`Scraping 0/${targets.length}…`)
+      let updated = 0
+      let failed = 0
+
+      for (const [index, bookmark] of targets.entries()) {
+        toast.loading(`Scraping ${index + 1}/${targets.length}…`, {
+          id: toastId,
+        })
+        try {
+          const update = await scrapeBookmarkUpdate(
+            bookmark.url as string,
+            bookmark.title,
+            translate,
+          )
+
+          if (Object.keys(update).length) {
+            await updateBookmark(bookmark.id, update)
+            updated++
+          }
+        } catch {
+          failed++
+        }
+      }
+
+      return { failed, toastId, updated }
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries()
+    },
+    onSuccess: ({ failed, toastId, updated }) => {
+      const message = `Scraped ${updated} bookmark${updated === 1 ? '' : 's'}`
+
+      if (failed) {
+        toast.warning(`${message}, ${failed} failed`, { id: toastId })
+      } else {
+        toast.success(message, { id: toastId })
+      }
+    },
+  })
+  const isDisabled = isPending || isScraping || selectedIds.length === 0
   const trimmedTag = tag.trim()
   const isAllSelected = totalCount > 0 && selectedIds.length === totalCount
 
@@ -168,6 +221,15 @@ export const BulkActionBar = ({
             </option>
           ))}
         </select>
+        <Button
+          size="xs"
+          variant="ghost"
+          disabled={isDisabled}
+          onClick={() => scrape()}
+          title="Update the description and image from each page"
+        >
+          <DownloadIcon size={16} weight="duotone" /> Scrape
+        </Button>
         <Button
           size="xs"
           variant="ghost"
