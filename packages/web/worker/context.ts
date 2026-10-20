@@ -36,6 +36,8 @@ export const profileToRow = (profile: Profile): UserProfile => ({
   settings_description_language:
     profile.settingsDescriptionLanguage as UserProfile['settings_description_language'],
   settings_group_by_date: profile.settingsGroupByDate,
+  settings_hidden_sections:
+    profile.settingsHiddenSections as UserProfile['settings_hidden_sections'],
   settings_open_in_new_tab: profile.settingsOpenInNewTab,
   settings_pinned_tags: profile.settingsPinnedTags,
   settings_tags_visible: profile.settingsTagsVisible,
