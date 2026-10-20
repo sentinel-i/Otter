@@ -70,6 +70,13 @@
       "when": 1792448774422,
       "tag": "0009_open_in_new_tab",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792456486440,
+      "tag": "0010_description_language",
+      "breakpoints": true
     }
   ],
   "version": "7"

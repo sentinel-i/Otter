@@ -109,7 +109,9 @@ export const Feed = memo(
       [items],
     )
     // Ignore selected bookmarks that have left the feed (trashed, filtered)
-    const selectedIds = bookmarkIds.filter((id) => selection.has(id))
+    const selectedBookmarks = items.filter(
+      (item): item is Bookmark => isBookmark(item) && selection.has(item.id),
+    )
     const handleSelectedChange = (id: string, isSelected: boolean) => {
       setSelection((prev) => {
         const next = new Set(prev)
@@ -254,7 +256,7 @@ export const Feed = memo(
         {/* Outside the header so it stays stuck while scrolling the feed */}
         {isSelecting ? (
           <BulkActionBar
-            selectedIds={selectedIds}
+            selectedBookmarks={selectedBookmarks}
             totalCount={bookmarkIds.length}
             onSelectAll={() => setSelection(new Set(bookmarkIds))}
             onClear={() => setSelection(new Set())}

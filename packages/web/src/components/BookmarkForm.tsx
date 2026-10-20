@@ -30,6 +30,7 @@ import { useIsBookmarklet } from '@/hooks/useIsBookmarklet'
 import { useIsMobile } from '@/hooks/useMobile'
 import { useScrapeMutation } from '@/hooks/useScrapeMutation'
 import {
+  rewriteDescription,
   rewriteDescriptionOptions,
   rewriteTitleOptions,
 } from '@/utils/fetching/ai'
@@ -52,6 +53,7 @@ import { FormGroup } from './FormGroup'
 import { IconButton } from './IconButton'
 import { PossibleMatchingItems } from './PossibleMatchingItems'
 import { TypeRadio } from './TypeRadio'
+import { useUser } from './UserProvider'
 
 export interface ComboOption {
   label: string
@@ -199,6 +201,10 @@ export const BookmarkForm = ({
 
   // Scraping
   const scrapeMutation = useScrapeMutation()
+  const { profile } = useUser()
+  const shouldTranslateDescription = Boolean(
+    profile?.settings_description_language,
+  )
 
   const handleScrape = useCallback(
     (url: string) => {
@@ -210,6 +216,16 @@ export const BookmarkForm = ({
           lastScrapedUrl.current = normalizeUrl(data.url ?? url)
           setFieldValue('title', data.title)
           setFieldValue('description', data.description)
+          // The description rewriter translates when the profile asks for it
+          if (shouldTranslateDescription && data.description) {
+            rewriteDescription(data.description, data.title ?? undefined)
+              .then(({ response }) => {
+                if (response) {
+                  setFieldValue('description', response)
+                }
+              })
+              .catch((error) => console.error(error))
+          }
           if (data.url !== data.image) {
             setFieldValue('image', data.image)
           }
@@ -226,7 +242,12 @@ export const BookmarkForm = ({
         },
       })
     },
-    [scrapeMutation, setFieldValue, triggerClassify],
+    [
+      scrapeMutation,
+      setFieldValue,
+      shouldTranslateDescription,
+      triggerClassify,
+    ],
   )
 
   const handleSubmitForm = async (formData: BookmarkFormValues) => {

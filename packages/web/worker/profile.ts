@@ -3,6 +3,7 @@ import type { Context } from 'hono'
 import { z } from 'zod'
 import { profiles } from '../db/schema'
 import { API_HEADERS } from '../src/constants'
+import { DESCRIPTION_LANGUAGES } from '../src/types/db'
 import { errorResponse } from '../src/utils/fetching/errorResponse'
 import { getErrorMessage } from '../src/utils/get-error-message'
 import { getProfileById, requireRequestContext } from './context'
@@ -28,6 +29,10 @@ const updateProfileSchema = z.discriminatedUnion('column', [
     column: z.literal('settings_collections_visible'),
     value: z.boolean(),
   }),
+  z.object({
+    column: z.literal('settings_description_language'),
+    value: z.enum(DESCRIPTION_LANGUAGES).nullable(),
+  }),
   z.object({ column: z.literal('settings_group_by_date'), value: z.boolean() }),
   z.object({
     column: z.literal('settings_open_in_new_tab'),
@@ -51,6 +56,8 @@ const getProfileUpdate = (update: z.infer<typeof updateProfileSchema>) => {
       return { avatarUrl: update.value }
     case 'settings_collections_visible':
       return { settingsCollectionsVisible: update.value }
+    case 'settings_description_language':
+      return { settingsDescriptionLanguage: update.value }
     case 'settings_group_by_date':
       return { settingsGroupByDate: update.value }
     case 'settings_open_in_new_tab':

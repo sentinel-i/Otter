@@ -210,7 +210,7 @@ function RouteComponent() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-xs">
         <h1 className="text-2xl font-bold">Journal</h1>
-        <div className="flex gap-3xs">
+        <div className="flex flex-wrap gap-3xs">
           {activeJournal ? (
             <Button
               size="xs"
@@ -238,52 +238,13 @@ function RouteComponent() {
               Select
             </Button>
           ) : null}
-        </div>
-      </div>
-
-      <div className="flex gap-4 justify-between flex-wrap">
-        {journals.length ? (
-          <div className="flex items-center gap-4 flex-wrap">
-            <IconControl
-              type="radio"
-              value=""
-              label="All"
-              name="journalFilter"
-              onChange={() => setJournalFilter(undefined)}
-              checked={!journalFilter}
-            >
-              <CircleIcon size={18} weight="duotone" />
-            </IconControl>
-            {journals.map((journalItem) => (
-              <IconControl
-                key={journalItem.id}
-                type="radio"
-                value={String(journalItem.id)}
-                label={journalItem.name}
-                name="journalFilter"
-                onChange={(e) =>
-                  setJournalFilter(
-                    e.currentTarget.checked ? journalItem.id : undefined,
-                  )
-                }
-                checked={journalFilter === journalItem.id}
-              >
-                <NotebookIcon size={18} weight="duotone" />
-              </IconControl>
-            ))}
-          </div>
-        ) : (
-          <div />
-        )}
-        <div className="flex gap-xs">
           <Dialog
             open={isJournalDialogOpen}
             onOpenChange={setIsJournalDialogOpen}
           >
             <DialogTrigger asChild>
-              <Button variant="outline">
-                <PlusCircleIcon size={18} weight="duotone" />
-                New journal
+              <Button size="xs" variant="ghost">
+                <PlusCircleIcon size={16} weight="duotone" /> New journal
               </Button>
             </DialogTrigger>
             <DialogContent placement="center" width="m">
@@ -302,9 +263,8 @@ function RouteComponent() {
             }}
           >
             <DialogTrigger asChild>
-              <Button variant="outline">
-                <PlusCircleIcon size={18} weight="duotone" />
-                New entry
+              <Button size="xs" variant="ghost">
+                <PlusCircleIcon size={16} weight="duotone" /> New entry
               </Button>
             </DialogTrigger>
             <DialogContent placement="center" width="m">
@@ -332,6 +292,38 @@ function RouteComponent() {
         </div>
       </div>
 
+      {journals.length ? (
+        <div className="flex items-center gap-4 flex-wrap">
+          <IconControl
+            type="radio"
+            value=""
+            label="All"
+            name="journalFilter"
+            onChange={() => setJournalFilter(undefined)}
+            checked={!journalFilter}
+          >
+            <CircleIcon size={18} weight="duotone" />
+          </IconControl>
+          {journals.map((journalItem) => (
+            <IconControl
+              key={journalItem.id}
+              type="radio"
+              value={String(journalItem.id)}
+              label={journalItem.name}
+              name="journalFilter"
+              onChange={(e) =>
+                setJournalFilter(
+                  e.currentTarget.checked ? journalItem.id : undefined,
+                )
+              }
+              checked={journalFilter === journalItem.id}
+            >
+              <NotebookIcon size={18} weight="duotone" />
+            </IconControl>
+          ))}
+        </div>
+      ) : null}
+
       {isSelecting ? (
         <div className="card sticky top-2xs z-10 max-w-prose">
           <div className="flex flex-wrap items-center gap-2xs">
@@ -357,24 +349,26 @@ function RouteComponent() {
                 Select all ({entries.length})
               </Button>
             )}
-            <select
-              aria-label="Move to journal"
-              className="input-base focus w-auto text-step--2"
-              disabled={batchMutation.isPending || selectedIds.length === 0}
-              onChange={(event) => {
-                if (event.target.value) {
-                  handleMoveEntries(Number(event.target.value))
-                }
-              }}
-              value=""
-            >
-              <option value="">Move to…</option>
-              {journals.map((journalItem) => (
-                <option key={journalItem.id} value={journalItem.id}>
-                  {journalItem.name}
-                </option>
-              ))}
-            </select>
+            {journals.length ? (
+              <select
+                aria-label="Move to journal"
+                className="input-base focus w-auto text-step--2"
+                disabled={batchMutation.isPending || selectedIds.length === 0}
+                onChange={(event) => {
+                  if (event.target.value) {
+                    handleMoveEntries(Number(event.target.value))
+                  }
+                }}
+                value=""
+              >
+                <option value="">Move to…</option>
+                {journals.map((journalItem) => (
+                  <option key={journalItem.id} value={journalItem.id}>
+                    {journalItem.name}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <Button
               size="xs"
               variant="ghost"

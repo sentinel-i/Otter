@@ -120,6 +120,22 @@ describe('scrapedBookmark', () => {
     expect(promptFor('description')).not.toContain('Messy | Title')
   })
 
+  it('asks for the description in the profile language when one is set', async () => {
+    scrapeMetadata.mockResolvedValue({
+      description: 'Scraped description',
+      title: 'Title',
+      url: 'https://example.com/',
+      urlType: 'link',
+    })
+
+    await scrapedBookmark('https://example.com/', {}, dbTags, context, 'French')
+    expect(promptFor('description')).toContain('in French')
+
+    aiRun.mockClear()
+    await scrapedBookmark('https://example.com/', {}, dbTags, context)
+    expect(promptFor('description')).not.toContain('in French')
+  })
+
   it('classifies on the scraped wording, not the rewritten wording', async () => {
     scrapeMetadata.mockResolvedValue({
       description: 'Scraped description',
