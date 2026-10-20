@@ -159,75 +159,8 @@ export const Feed = memo(
               {icon}
               {title}
             </h3>
-            {showFeedOptions || shareConfig || actions ? (
+            {shareConfig || actions ? (
               <Flex gap="3xs">
-                {showFeedOptions ? (
-                  <>
-                    <Button
-                      onClick={() => handleToggleState('star')}
-                      size="xs"
-                      variant="ghost"
-                      aria-pressed={starQuery}
-                    >
-                      <StarIcon
-                        size={16}
-                        weight={starQuery ? 'fill' : 'duotone'}
-                      />{' '}
-                      Stars
-                    </Button>
-                    <Button
-                      onClick={() => handleToggleState('public')}
-                      size="xs"
-                      variant="ghost"
-                      aria-pressed={publicQuery}
-                    >
-                      <EyeIcon
-                        size={16}
-                        weight={publicQuery ? 'fill' : 'duotone'}
-                      />{' '}
-                      Public
-                    </Button>
-                    <Button
-                      onClick={() => setWindowQuery((prev) => prev + 1)}
-                      size="xs"
-                      variant="ghost"
-                      aria-pressed={windowQuery > 0}
-                      title="Click again to go back another 7 days"
-                    >
-                      <ClockCounterClockwiseIcon
-                        size={16}
-                        weight={windowQuery > 0 ? 'fill' : 'duotone'}
-                      />{' '}
-                      {windowQuery > 1
-                        ? `${(windowQuery - 1) * 7 + 1}–${windowQuery * 7} days ago`
-                        : 'Last 7 days'}
-                    </Button>
-                    {windowQuery > 0 ? (
-                      <Button
-                        onClick={() => setWindowQuery(0)}
-                        size="xs"
-                        variant="ghost"
-                        aria-label="Clear date filter"
-                      >
-                        <XIcon size={16} />
-                      </Button>
-                    ) : null}
-                    {canSelect ? (
-                      <Button
-                        onClick={handleToggleSelecting}
-                        size="xs"
-                        variant="ghost"
-                        aria-pressed={isSelecting}
-                      >
-                        <CheckSquareIcon
-                          size={16}
-                          weight={isSelecting ? 'fill' : 'duotone'}
-                        />{' '}
-                        Select
-                      </Button>
-                    ) : null}
-                  </>
-                ) : null}
                 {shareConfig ? (
                   <ShareDialog
                     kind={shareConfig.kind}
@@ -253,14 +186,78 @@ export const Feed = memo(
             </Flex>
           ) : null}
         </Flex>
-        {/* Outside the header so it stays stuck while scrolling the feed */}
-        {isSelecting ? (
-          <BulkActionBar
-            selectedBookmarks={selectedBookmarks}
-            totalCount={bookmarkIds.length}
-            onSelectAll={() => setSelection(new Set(bookmarkIds))}
-            onClear={() => setSelection(new Set())}
-          />
+        {/* Floating toolbar, stuck under the top bar while scrolling. The bulk
+            action bar opens inside it. */}
+        {showFeedOptions ? (
+          <div className={cn('feed-toolbar', isSelecting && 'is-selecting')}>
+            <Flex gap="3xs" align="center" wrap="wrap">
+              <Button
+                onClick={() => handleToggleState('star')}
+                size="xs"
+                variant="ghost"
+                aria-pressed={starQuery}
+              >
+                <StarIcon size={16} weight={starQuery ? 'fill' : 'duotone'} />{' '}
+                Stars
+              </Button>
+              <Button
+                onClick={() => handleToggleState('public')}
+                size="xs"
+                variant="ghost"
+                aria-pressed={publicQuery}
+              >
+                <EyeIcon size={16} weight={publicQuery ? 'fill' : 'duotone'} />{' '}
+                Public
+              </Button>
+              <Button
+                onClick={() => setWindowQuery((prev) => prev + 1)}
+                size="xs"
+                variant="ghost"
+                aria-pressed={windowQuery > 0}
+                title="Click again to go back another 7 days"
+              >
+                <ClockCounterClockwiseIcon
+                  size={16}
+                  weight={windowQuery > 0 ? 'fill' : 'duotone'}
+                />{' '}
+                {windowQuery > 1
+                  ? `${(windowQuery - 1) * 7 + 1}–${windowQuery * 7} days ago`
+                  : 'Last 7 days'}
+              </Button>
+              {windowQuery > 0 ? (
+                <Button
+                  onClick={() => setWindowQuery(0)}
+                  size="xs"
+                  variant="ghost"
+                  aria-label="Clear date filter"
+                >
+                  <XIcon size={16} />
+                </Button>
+              ) : null}
+              {canSelect ? (
+                <Button
+                  onClick={handleToggleSelecting}
+                  size="xs"
+                  variant="ghost"
+                  aria-pressed={isSelecting}
+                >
+                  <CheckSquareIcon
+                    size={16}
+                    weight={isSelecting ? 'fill' : 'duotone'}
+                  />{' '}
+                  Select
+                </Button>
+              ) : null}
+            </Flex>
+            {isSelecting ? (
+              <BulkActionBar
+                selectedBookmarks={selectedBookmarks}
+                totalCount={bookmarkIds.length}
+                onSelectAll={() => setSelection(new Set(bookmarkIds))}
+                onClear={() => setSelection(new Set())}
+              />
+            ) : null}
+          </div>
         ) : null}
 
         {allowGroupByDate && groupByDate ? (

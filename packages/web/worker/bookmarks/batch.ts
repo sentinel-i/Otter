@@ -26,6 +26,8 @@ export const batchUpdateSchema = z.object({
       value: z.enum(bookmarkTypeEnum.enumValues),
     }),
     z.object({ type: z.literal('trash') }),
+    z.object({ type: z.literal('clearDescription') }),
+    z.object({ type: z.literal('clearImage') }),
   ]),
   ids: z.array(z.uuid()).min(1).max(MAX_BATCH_SIZE),
 })
@@ -54,6 +56,10 @@ export const getBatchUpdate = (
       return { type: action.value }
     case 'trash':
       return { status: 'inactive' }
+    case 'clearDescription':
+      return { description: null }
+    case 'clearImage':
+      return { image: null }
   }
 }
 
