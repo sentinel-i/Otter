@@ -361,7 +361,9 @@ function RouteComponent() {
                 }}
                 value=""
               >
-                <option value="">Move to…</option>
+                <option value="" disabled hidden>
+                  Move to…
+                </option>
                 {journals.map((journalItem) => (
                   <option key={journalItem.id} value={journalItem.id}>
                     {journalItem.name}
