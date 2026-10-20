@@ -3,7 +3,11 @@ import { Hono, type MiddlewareHandler } from 'hono'
 import { getErrorMessage } from '@/utils/get-error-message'
 import { createAuth } from '../auth/server'
 import { classifyBookmark } from './ai/classify'
-import { descriptionSystemPrompt } from './ai/description'
+import {
+  descriptionSystemPrompt,
+  descriptionWriterPrompt,
+  descriptionWriterSystemPrompt,
+} from './ai/description'
 import { generateResponse } from './ai/generateResponse'
 import { MAX_CONTENT_LENGTH, summariseSystemPrompt } from './ai/summarise'
 import { titleSystemPrompt } from './ai/title'
@@ -145,16 +149,27 @@ api.post('/ai/title', authedWithRateLimit('ai'), async (context) => {
   })
 })
 api.post('/ai/description', authedWithRateLimit('ai'), async (context) => {
-  const { title, prompt } = await context.req.json()
+  const { title, prompt, url } = await context.req.json()
   const requestContext = await requireRequestContext(context)
   const language =
     requestContext instanceof Response
       ? null
       : requestContext.profile?.settings_description_language
+
+  // With a description language set, write a new description in it rather
+  // than reworking the site's own
+  if (language) {
+    return await generateResponse({
+      context,
+      prompt: descriptionWriterPrompt({ text: prompt, title, url }),
+      systemPrompt: descriptionWriterSystemPrompt(language),
+    })
+  }
+
   return await generateResponse({
     context,
     prompt,
-    systemPrompt: descriptionSystemPrompt(title, language),
+    systemPrompt: descriptionSystemPrompt(title),
   })
 })
 api.post('/ai/summarise', authedWithRateLimit('ai'), async (context) => {

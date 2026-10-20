@@ -9,7 +9,11 @@ import { getErrorMessage } from '@/utils/get-error-message'
 import { matchTags } from '@/utils/matchTags'
 import { bookmarks } from '../../db/schema'
 import { classifyBookmark } from '../ai/classify'
-import { descriptionSystemPrompt } from '../ai/description'
+import {
+  descriptionSystemPrompt,
+  descriptionWriterPrompt,
+  descriptionWriterSystemPrompt,
+} from '../ai/description'
 import { generateText } from '../ai/generateResponse'
 import { titleSystemPrompt } from '../ai/title'
 import { type RequestContext, requireRequestContext } from '../context'
@@ -144,6 +148,7 @@ const rewriteFields = async (
   context: HonoContext,
   title?: string | null,
   description?: string | null,
+  url?: string | null,
   descriptionLanguage?: string | null,
 ) => {
   try {
@@ -155,16 +160,25 @@ const rewriteFields = async (
         })
       : ''
     const finalTitle = nextTitle || title
-    const nextDescription = description
+    // With a description language set, write a new description in it
+    // (even when the page has none) rather than reworking the site's own
+    const nextDescription = descriptionLanguage
       ? await generateText({
           context,
-          prompt: description,
-          systemPrompt: descriptionSystemPrompt(
-            finalTitle ?? undefined,
-            descriptionLanguage,
-          ),
+          prompt: descriptionWriterPrompt({
+            text: description,
+            title: finalTitle,
+            url,
+          }),
+          systemPrompt: descriptionWriterSystemPrompt(descriptionLanguage),
         })
-      : ''
+      : description
+        ? await generateText({
+            context,
+            prompt: description,
+            systemPrompt: descriptionSystemPrompt(finalTitle ?? undefined),
+          })
+        : ''
 
     return {
       description: nextDescription || description,
@@ -223,7 +237,13 @@ export const scrapedBookmark = async (
   // hint about what the page is. Neither call needs the other's answer, so
   // they run together rather than one after the other.
   const [rewritten, auto] = await Promise.all([
-    rewriteFields(context, base.title, base.description, descriptionLanguage),
+    rewriteFields(
+      context,
+      base.title,
+      base.description,
+      base.url ?? url,
+      descriptionLanguage,
+    ),
     autoClassify(
       context,
       {

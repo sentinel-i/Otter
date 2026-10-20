@@ -56,7 +56,7 @@ const TranslateDescriptionsSetting = () => {
           })
         }
       />
-      Translate scraped descriptions into French
+      Write descriptions in French
     </label>
   )
 }
@@ -78,8 +78,10 @@ function RouteComponent() {
       </p>
       <TranslateDescriptionsSetting />
       <p className="text-step--1 text-theme10">
-        Applies to &ldquo;Scrape this URL&rdquo;, the bulk Scrape action and the
-        AI description rewrite.
+        The AI writes a short description of each page in French, from its
+        title, address and text, instead of reusing the site&rsquo;s own.
+        Applies to &ldquo;Scrape this URL&rdquo;, the bulk Scrape action, the AI
+        description button and bookmarks saved from the extensions.
       </p>
     </article>
   )

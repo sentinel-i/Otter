@@ -29,7 +29,7 @@ describe('scrapeBookmarkUpdate', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  it('translates the description when asked', async () => {
+  it('has the AI write the description when asked', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: string) =>

@@ -79,7 +79,7 @@ export const BulkActionBar = ({
   const { isPending: isScraping, mutate: scrape } = useMutation({
     mutationFn: async () => {
       const targets = selectedBookmarks.filter((bookmark) => bookmark.url)
-      const translate = Boolean(profile?.settings_description_language)
+      const writeDescription = Boolean(profile?.settings_description_language)
       const toastId = toast.loading(`Scraping 0/${targets.length}…`)
       let updated = 0
       let failed = 0
@@ -92,7 +92,7 @@ export const BulkActionBar = ({
           const update = await scrapeBookmarkUpdate(
             bookmark.url as string,
             bookmark.title,
-            translate,
+            writeDescription,
           )
 
           if (Object.keys(update).length) {

@@ -40,7 +40,10 @@ const stubAi = ({
       return { response: title }
     }
 
-    if (systemPrompt.startsWith('You are a web page description rewriter')) {
+    if (
+      systemPrompt.startsWith('You are a web page description rewriter') ||
+      systemPrompt.startsWith('You write descriptions of web pages')
+    ) {
       return { response: description }
     }
 
@@ -120,20 +123,29 @@ describe('scrapedBookmark', () => {
     expect(promptFor('description')).not.toContain('Messy | Title')
   })
 
-  it('asks for the description in the profile language when one is set', async () => {
+  it('writes the description in the profile language when one is set', async () => {
     scrapeMetadata.mockResolvedValue({
       description: 'Scraped description',
       title: 'Title',
       url: 'https://example.com/',
       urlType: 'link',
     })
+    stubAi({ description: 'Une description en français', title: 'Title' })
 
-    await scrapedBookmark('https://example.com/', {}, dbTags, context, 'French')
-    expect(promptFor('description')).toContain('in French')
+    const result = await scrapedBookmark(
+      'https://example.com/',
+      {},
+      dbTags,
+      context,
+      'French',
+    )
+    const prompt = systemPrompts().find((content) =>
+      content.startsWith('You write descriptions of web pages'),
+    )
 
-    aiRun.mockClear()
-    await scrapedBookmark('https://example.com/', {}, dbTags, context)
-    expect(promptFor('description')).not.toContain('in French')
+    expect(prompt).toContain('in French')
+    expect(result.description).toBe('Une description en français')
+    expect(promptFor('description')).toBeUndefined()
   })
 
   it('classifies on the scraped wording, not the rewritten wording', async () => {
