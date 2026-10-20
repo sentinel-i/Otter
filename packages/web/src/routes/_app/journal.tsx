@@ -325,8 +325,20 @@ function RouteComponent() {
       ) : null}
 
       {isSelecting ? (
-        <div className="card sticky top-2xs z-10 max-w-prose">
+        <div className="feed-toolbar is-selecting max-w-prose">
           <div className="flex flex-wrap items-center gap-2xs">
+            {/* Stuck while scrolling, so selection can be left from anywhere */}
+            <Button
+              size="xs"
+              variant="ghost"
+              aria-pressed
+              onClick={() => {
+                setIsSelecting(false)
+                setSelection(new Set())
+              }}
+            >
+              <CheckSquareIcon size={16} weight="fill" /> Select
+            </Button>
             <strong className="text-step--1">
               {selectedIds.length} selected
             </strong>
