@@ -304,6 +304,7 @@ export const profiles = pgTable(
     settingsCollectionsVisible: boolean('settings_collections_visible')
       .notNull()
       .default(false),
+    settingsDescriptionLanguage: text('settings_description_language'),
     settingsGroupByDate: boolean('settings_group_by_date').default(false),
     settingsOpenInNewTab: boolean('settings_open_in_new_tab')
       .notNull()

@@ -40,6 +40,27 @@ const OpenInNewTabSetting = () => {
   )
 }
 
+const TranslateDescriptionsSetting = () => {
+  const { profile, handleUpdateUISettings } = useUser()
+
+  return (
+    <label className="flex items-center gap-2xs">
+      <input
+        type="checkbox"
+        className="size-5 shrink-0 cursor-pointer accent-accent9"
+        checked={profile?.settings_description_language === 'French'}
+        onChange={(event) =>
+          handleUpdateUISettings({
+            payload: event.target.checked ? 'French' : null,
+            type: 'settings_description_language',
+          })
+        }
+      />
+      Translate scraped descriptions into French
+    </label>
+  )
+}
+
 function RouteComponent() {
   const user = Route.useLoaderData()
 
@@ -54,6 +75,11 @@ function RouteComponent() {
       <p className="text-step--1 text-theme10">
         The &ldquo;More&rdquo; menu on each bookmark always offers the other
         option.
+      </p>
+      <TranslateDescriptionsSetting />
+      <p className="text-step--1 text-theme10">
+        Applies to &ldquo;Scrape this URL&rdquo;, the bulk Scrape action and the
+        AI description rewrite.
       </p>
     </article>
   )

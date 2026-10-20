@@ -33,6 +33,8 @@ export const profileToRow = (profile: Profile): UserProfile => ({
   avatar_url: profile.avatarUrl,
   id: profile.id,
   settings_collections_visible: profile.settingsCollectionsVisible,
+  settings_description_language:
+    profile.settingsDescriptionLanguage as UserProfile['settings_description_language'],
   settings_group_by_date: profile.settingsGroupByDate,
   settings_open_in_new_tab: profile.settingsOpenInNewTab,
   settings_pinned_tags: profile.settingsPinnedTags,

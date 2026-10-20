@@ -146,10 +146,15 @@ api.post('/ai/title', authedWithRateLimit('ai'), async (context) => {
 })
 api.post('/ai/description', authedWithRateLimit('ai'), async (context) => {
   const { title, prompt } = await context.req.json()
+  const requestContext = await requireRequestContext(context)
+  const language =
+    requestContext instanceof Response
+      ? null
+      : requestContext.profile?.settings_description_language
   return await generateResponse({
     context,
     prompt,
-    systemPrompt: descriptionSystemPrompt(title),
+    systemPrompt: descriptionSystemPrompt(title, language),
   })
 })
 api.post('/ai/summarise', authedWithRateLimit('ai'), async (context) => {

@@ -110,11 +110,16 @@ export interface BookmarkFormValues
   id?: string
 }
 
+/** Languages AI-written bookmark descriptions can be translated into */
+export const DESCRIPTION_LANGUAGES = ['French'] as const
+export type DescriptionLanguage = (typeof DESCRIPTION_LANGUAGES)[number]
+
 export interface UserProfile {
   api_key: string | null
   avatar_url: string | null
   id: string
   settings_collections_visible: boolean
+  settings_description_language: DescriptionLanguage | null
   settings_group_by_date: boolean | null
   settings_open_in_new_tab: boolean
   settings_pinned_tags: string[]

@@ -144,6 +144,7 @@ const rewriteFields = async (
   context: HonoContext,
   title?: string | null,
   description?: string | null,
+  descriptionLanguage?: string | null,
 ) => {
   try {
     const nextTitle = title
@@ -158,7 +159,10 @@ const rewriteFields = async (
       ? await generateText({
           context,
           prompt: description,
-          systemPrompt: descriptionSystemPrompt(finalTitle ?? undefined),
+          systemPrompt: descriptionSystemPrompt(
+            finalTitle ?? undefined,
+            descriptionLanguage,
+          ),
         })
       : ''
 
@@ -187,6 +191,7 @@ export const scrapedBookmark = async (
   rest: Partial<Bookmark>,
   dbTags: MetaTag[],
   context: HonoContext,
+  descriptionLanguage?: string | null,
 ): Promise<Partial<Bookmark>> => {
   const tags = rest.tags ?? []
   let base: Partial<Bookmark>
@@ -218,7 +223,7 @@ export const scrapedBookmark = async (
   // hint about what the page is. Neither call needs the other's answer, so
   // they run together rather than one after the other.
   const [rewritten, auto] = await Promise.all([
-    rewriteFields(context, base.title, base.description),
+    rewriteFields(context, base.title, base.description, descriptionLanguage),
     autoClassify(
       context,
       {
@@ -259,7 +264,13 @@ export const postNewBookmark = async (context: HonoContext) => {
     const mapper = async ({ scrape, url, ...rest }: NewBookmark) => {
       if (url && scrape) {
         return toBookmarkInsert(
-          await scrapedBookmark(url, rest, dbTags, context),
+          await scrapedBookmark(
+            url,
+            rest,
+            dbTags,
+            context,
+            auth.requestContext.profile?.settings_description_language,
+          ),
           auth.userId,
         )
       }
